@@ -14,7 +14,7 @@ const AvailableMeals = () => {
       setError(null);
 
       try {
-        const response = await fetch("https://order-food-62c28-default-rtdb.firebaseio.com/Meals.jso");
+        const response = await fetch("https://order-food-62c28-default-rtdb.firebaseio.com/Meals.json");
         if(!response.ok) {
           throw new Error("Something went wrong !");
         }
@@ -57,8 +57,8 @@ const AvailableMeals = () => {
     <section className={classes.meals}>
       <Card>
         <ul>{mealsList}</ul>
-        {!isLoading && error && <p>{error}</p>}
-        {isLoading && !error && <p>Loading the meals !</p>}
+        {!isLoading && error && <p style={{color: 'red'}}>{error}</p>}
+        {isLoading && !error && <p style={{color: 'blue'}}>Loading the meals !</p>}
       </Card>
     </section>
   );
