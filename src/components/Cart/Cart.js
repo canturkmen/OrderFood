@@ -1,12 +1,16 @@
+import React from "react";
 import { useContext, useState } from "react";
+import classes from "./Cart.module.css";
+
 import CartContext from "../../store/cart-context";
 import Modal from "../UI/Modal";
-import classes from "./Cart.module.css";
 import CartItem from "./CartItem";
 import Checkout from "./Checkout";
 
 const Cart = (props) => {
   const [isCheckout, setIsCheckout] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
 
   const cartCtx = useContext(CartContext);
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
@@ -22,6 +26,22 @@ const Cart = (props) => {
 
   const orderClickedHandler = () => {
     setIsCheckout(true);
+  };
+
+  const onConfirmHandler = async (enteredData) => {
+    setIsSubmitting(true);
+    await fetch(
+      "https://order-food-62c28-default-rtdb.firebaseio.com/orders.json",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          user: enteredData,
+          items: cartCtx.mealItems,
+        }),
+      }
+    );
+    setIsSubmitting(false);
+    setDidSubmit(true);
   };
 
   const mealItems = (
@@ -41,15 +61,6 @@ const Cart = (props) => {
     </ul>
   );
 
-  const onConfirmHandler = async (enteredData) => {  
-      await fetch('https://order-food-62c28-default-rtdb.firebaseio.com/orders.json', {
-          method: "POST",
-          body: JSON.stringify({
-            user: enteredData,
-            items: cartCtx.mealItems
-          }), 
-      });
-    }
   const CartActions = (
     <div className={classes.actions}>
       <button onClick={props.onHideCart} className={classes["button--alt"]}>
@@ -63,8 +74,8 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal onHideCart={props.onHideCart}>
+  const cartModalContent = (
+    <React.Fragment>
       {mealItems}
       <div className={classes.total}>
         <span>Total Amount</span>
@@ -74,6 +85,27 @@ const Cart = (props) => {
         <Checkout onCancel={props.onHideCart} onConfirm={onConfirmHandler} />
       )}
       {!isCheckout && CartActions}
+    </React.Fragment>
+  );
+
+  const isSubmittingModalContent = <p>Sending Order Data ...</p>;
+
+  const didSubmitModalContent = (
+    <React.Fragment>
+      <p>Succesfully sent the order !</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.onHideCart}>
+          Close 
+        </button>
+      </div>
+    </React.Fragment>
+  );
+
+  return (
+    <Modal onHideCart={props.onHideCart}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && !didSubmit && isSubmittingModalContent}
+      {didSubmit && didSubmitModalContent}
     </Modal>
   );
 };
