@@ -41,6 +41,15 @@ const Cart = (props) => {
     </ul>
   );
 
+  const onConfirmHandler = async (enteredData) => {  
+      await fetch('https://order-food-62c28-default-rtdb.firebaseio.com/orders.json', {
+          method: "POST",
+          body: JSON.stringify({
+            user: enteredData,
+            items: cartCtx.mealItems
+          }), 
+      });
+    }
   const CartActions = (
     <div className={classes.actions}>
       <button onClick={props.onHideCart} className={classes["button--alt"]}>
@@ -61,7 +70,9 @@ const Cart = (props) => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      {isCheckout && <Checkout onCancel={props.onHideCart}/>}
+      {isCheckout && (
+        <Checkout onCancel={props.onHideCart} onConfirm={onConfirmHandler} />
+      )}
       {!isCheckout && CartActions}
     </Modal>
   );
